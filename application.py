@@ -6,9 +6,15 @@ allSymptoms = set()
 message = ""
 relatedSymptoms = []
 shouldNotAskAgain =[]
-
+i = 0
+crossQuestion = False
+previousStatement = ""
 while(True):
-    sentence = input("\nEnter the statement: ")
+    if crossQuestion == False:
+        sentence = input("\nEnter the statement: ")
+    else:
+        crossQuestion = False
+        sentence = previousStatement
     
     if sentence == "exit":
         break
@@ -23,6 +29,7 @@ while(True):
     elif ner_dict["symptoms"]=="":
          disease = ner_dict["disease"]
 
+#Stat of positive response 
     if intent == "POSITIVE":
         # get the symptoms..
         if symptom =="":
@@ -33,23 +40,40 @@ while(True):
         relatedSymptomsTF = application_util.lookup_operations.getRelevantSymptoms(allSymptoms)
         possibleDiseases = relatedSymptomsTF["diseaseSet"]
         relatedSymptoms = relatedSymptomsTF["relevantsymptoms"]
+        
         for s in shouldNotAskAgain:
             try:
                 relatedSymptoms.remove(s)
             except:
                 pass
-        if len(possibleDiseases) == 1 or len(relatedSymptoms) == 0:
-            handler.printDisease(possibleDiseases)
+        if i>=3:
+            if (len(possibleDiseases) == 1 or len(relatedSymptoms) == 0):
+                handler.printDisease(possibleDiseases)
+                possibleDiseases = set()
+                allSymptoms = set()
+                message = ""
+                relatedSymptoms = []
+                shouldNotAskAgain =[]
+                i = 0
+                continue
+        try:
+            print("\n\t Do you have any symptoms of "+relatedSymptoms[0])
+        except:
+            previousStatement = sentence
+            crossQuestion = True
             possibleDiseases = set()
             allSymptoms = set()
             message = ""
             relatedSymptoms = []
             shouldNotAskAgain =[]
+            i = 0
+            # allSymptoms = handler.acceptSymptoms(allSymptoms, symptom)
             continue
-        print("\n\t Do you have any symptoms of "+relatedSymptoms[0])
+        i+=1
         continue
-
+#end of positive response
     
+#Stat of positive response
     if intent == "NEGATIVE":
         shouldNotAskAgain.append(relatedSymptoms[0])
         for s in shouldNotAskAgain:
@@ -57,26 +81,33 @@ while(True):
                 relatedSymptoms.remove(s)
             except:
                 pass
-        # symptom = relatedSymptoms[0]
-        #relatedSymptoms = handler.rejectSymptoms(relatedSymptoms,symptom)
         
-        if len(possibleDiseases) == 1 or len(relatedSymptoms) == 0:
-            handler.printDisease(possibleDiseases)
+        if i>=3:
+            if (len(possibleDiseases) == 1 or len(relatedSymptoms) == 0):
+                handler.printDisease(possibleDiseases)
+                possibleDiseases = set()
+                allSymptoms = set()
+                message = ""
+                relatedSymptoms = []
+                shouldNotAskAgain =[]
+                i = 0
+                continue
+        try:
+            print("\n\t Do you have any symptoms of "+relatedSymptoms[0])
+        except:
+            previousStatement = sentence
+            crossQuestion = True
             possibleDiseases = set()
             allSymptoms = set()
             message = ""
             relatedSymptoms = []
             shouldNotAskAgain =[]
+            i = 0
+            # allSymptoms = handler.acceptSymptoms(allSymptoms, symptom)
             continue
-        print("\n\t Do you have any symptoms of "+relatedSymptoms[0])
-        
-
-
-    
-    
-    
-    
-    
+        i+=1
+        continue
+#Stat of positive response
     if intent == "SYMPTOM" and symptom!="":
         pass
     elif intent == "SYMPTOM":

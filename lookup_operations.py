@@ -35,8 +35,10 @@ def getRelevantSymptoms(symptom):
                 tf = symptomsTermFrequency.setdefault(tup[i],0)
                 symptomsTermFrequency[tup[i]] = tf+1
     for s in symptom:
-        symptomsTermFrequency.pop(s)
-
+        try:
+            symptomsTermFrequency.pop(s)
+        except:
+            pass
     symptomsTermFrequency=dict(sorted(symptomsTermFrequency.items(), key=lambda item: item[1],reverse=True))
     stf = []
 
@@ -45,7 +47,21 @@ def getRelevantSymptoms(symptom):
     return {"relevantsymptoms":stf,"diseaseSet":diseaseSet}
 
 # usage of getRelevantSymptoms()
-# symptoms = {"chills","nausea","high fever","vomiting",}
+# symptoms = {"shivering"}
 # getSet = getRelevantSymptoms(symptoms)
 # print(getSet["relevantsymptoms"])
 # print(getSet["diseaseSet"])
+# print(len(getSet["diseaseSet"]))
+
+# # import csv
+# file = open("asset\\symptoms.csv")
+# csvreader = csv.reader(file)
+# symptom = set()
+# i = 0
+# for r in csvreader:
+#     symptom.add(r[0])
+#     se = getRelevantSymptoms(symptom)
+#     if len(se["diseaseSet"])==1:
+#         i+=1
+#     symptom = set()
+# print(i)

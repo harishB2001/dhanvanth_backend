@@ -25,5 +25,5 @@ def cosineSimilarities(sentennce,path)->dict:
         return {"exactWord":exactWord,"score":score}
 # print("can start") ##must be removed while production
 
-#while(True): ##must be removed while production
-# print(cosineSimilarities(input())) ##must be removed while production
+# #while(True): ##must be removed while production
+# print(cosineSimilarities(input(),'asset\\symptoms.csv')) ##must be removed while production
