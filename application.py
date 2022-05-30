@@ -1,134 +1,137 @@
+from flask import Flask
+from flask import request
+import parser
+
 import application_util
 import handler
 
-possibleDiseases = set()
-allSymptoms = set()
-message = ""
-relatedSymptoms = []
-shouldNotAskAgain =[]
-i = 0
-crossQuestion = False
-previousStatement = ""
-while(True):
-    if crossQuestion == False:
-        sentence = input("\nEnter the statement: ")
-    else:
-        crossQuestion = False
-        sentence = previousStatement
-    
-    if sentence == "exit":
-        break
-    ner_dict = application_util.nerOperations(sentence.lower())
+app = Flask(__name__)
 
-    intent = application_util.getIntent(ner_dict["statement"])["intent"]
-    
-    symptom = ""
-    disease = ""
-    if ner_dict["disease"] =="":
-        symptom = ner_dict["symptoms"]
-    elif ner_dict["symptoms"]=="":
-         disease = ner_dict["disease"]
 
-#Stat of positive response 
-    if intent == "POSITIVE":
-        # get the symptoms..
-        if symptom =="":
-            symptom = relatedSymptoms[0]
+
+@app.route('/')
+def index():
+    ##start
+    p = parser.Parser(request.args)
+    ##end
+
+    while(True):
+        sentence=''
+        if p.crossQuestion == False:
+            sentence = p.statement
         else:
-            symptom = application_util.getExactSymptom(symptom)["exactWord"]
-        allSymptoms = handler.acceptSymptoms(allSymptoms, symptom)
-        relatedSymptomsTF = application_util.lookup_operations.getRelevantSymptoms(allSymptoms)
-        possibleDiseases = relatedSymptomsTF["diseaseSet"]
-        relatedSymptoms = relatedSymptomsTF["relevantsymptoms"]
+            p.crossQuestion = False
+            sentence = p.previousStatement
         
-        for s in shouldNotAskAgain:
+        if sentence == "exit":
+            break
+        ner_dict = application_util.nerOperations(sentence.lower())
+
+        intent = application_util.getIntent(ner_dict["statement"])["intent"]
+
+        symptom = ""
+        disease = ""
+        if ner_dict["disease"] =="":
+            symptom = ner_dict["symptoms"]
+        elif ner_dict["symptoms"]=="":
+            disease = ner_dict["disease"]
+    #Stat of positive response 
+        if intent == "POSITIVE":
+            # get the symptoms..
+            if symptom =="":
+                symptom = p.relatedSymptoms[0]
+            else:
+                symptom = application_util.getExactSymptom(symptom)["exactWord"]
+            p.allSymptoms = handler.acceptSymptoms(p.allSymptoms, symptom)
+            relatedSymptomsTF = application_util.lookup_operations.getRelevantSymptoms(p.allSymptoms)
+            p.possibleDiseases = relatedSymptomsTF["diseaseSet"]
+            p.relatedSymptoms = relatedSymptomsTF["relevantsymptoms"]
+          
+            for s in p.shouldNotAskAgain:
+                try:
+                    p.relatedSymptoms.remove(s)
+                except:
+                    pass
+            # ##
+            # return p.respons()
+            # ##
+
+            if p.i>=3:
+                if (len(p.possibleDiseases) == 1 or len(p.relatedSymptoms) == 0):
+                    return p.createResponse()
             try:
-                relatedSymptoms.remove(s)
+               p.message = "Do you have any symptoms of "+p.relatedSymptoms[0] +" ?"
+               p.i+=1
+               return  p.respons()
             except:
-                pass
-        if i>=3:
-            if (len(possibleDiseases) == 1 or len(relatedSymptoms) == 0):
-                handler.printDisease(possibleDiseases)
-                possibleDiseases = set()
-                allSymptoms = set()
-                message = ""
-                relatedSymptoms = []
-                shouldNotAskAgain =[]
-                i = 0
+                p.previousStatement = sentence
+                p.crossQuestion = True
+                p.possibleDiseases = set()
+                p.allSymptoms = set()
+                p.message = ""
+                p.relatedSymptoms = []
+                p.shouldNotAskAgain =[]
+                p.i = 0
+                # allSymptoms = handler.acceptSymptoms(allSymptoms, symptom)
                 continue
-        try:
-            print("\n\t Do you have any symptoms of "+relatedSymptoms[0])
-        except:
-            previousStatement = sentence
-            crossQuestion = True
-            possibleDiseases = set()
-            allSymptoms = set()
-            message = ""
-            relatedSymptoms = []
-            shouldNotAskAgain =[]
-            i = 0
-            # allSymptoms = handler.acceptSymptoms(allSymptoms, symptom)
-            continue
-        i+=1
-        continue
-#end of positive response
-    
-#Stat of positive response
-    if intent == "NEGATIVE":
-        shouldNotAskAgain.append(relatedSymptoms[0])
-        for s in shouldNotAskAgain:
+    #end of positive response
+
+    #Stat of negative response
+        if intent == "NEGATIVE":
+            p.shouldNotAskAgain.append(p.relatedSymptoms[0])
+            
+            for s in p.shouldNotAskAgain:
+                try:
+                    p.relatedSymptoms.remove(s)
+                except:
+                    pass
+       
+                    
+            if p.i>=3:
+                if (len(p.possibleDiseases) == 1 or len(p.relatedSymptoms) == 0):
+                    return p.createResponse()
             try:
-                relatedSymptoms.remove(s)
+                p.message = "Do you have any symptoms of "+p.relatedSymptoms[0] +" ?"
+                p.i+=1
+                return  p.respons()
             except:
-                pass
-        
-        if i>=3:
-            if (len(possibleDiseases) == 1 or len(relatedSymptoms) == 0):
-                handler.printDisease(possibleDiseases)
-                possibleDiseases = set()
-                allSymptoms = set()
-                message = ""
-                relatedSymptoms = []
-                shouldNotAskAgain =[]
-                i = 0
+                p.previousStatement = sentence
+                p.crossQuestion = True
+                p.possibleDiseases = set()
+                p.allSymptoms = set()
+                p.message = ""
+                p.relatedSymptoms = []
+                p.shouldNotAskAgain =[]
+                p.i = 0
+                # allSymptoms = handler.acceptSymptoms(allSymptoms, symptom)
                 continue
-        try:
-            print("\n\t Do you have any symptoms of "+relatedSymptoms[0])
-        except:
-            previousStatement = sentence
-            crossQuestion = True
-            possibleDiseases = set()
-            allSymptoms = set()
-            message = ""
-            relatedSymptoms = []
-            shouldNotAskAgain =[]
-            i = 0
-            # allSymptoms = handler.acceptSymptoms(allSymptoms, symptom)
-            continue
-        i+=1
-        continue
-#Stat of positive response
-    if intent == "SYMPTOM" and symptom!="":
-        pass
-    elif intent == "SYMPTOM":
-        pass
+    #Stat of negative response
 
 
-    if intent == "PRECAUTION" and disease!="":
-        pass
-    elif intent == "PRECAUTION":
-        pass
+        if intent == "SYMPTOM" and symptom!="":
+            pass
+        elif intent == "SYMPTOM":
+            pass
 
 
-    if intent =="TREATMENT" and disease!="":
-        pass
-    elif intent =="TREATMENT":
-        pass
+        if intent == "PRECAUTION" and disease!="":
+            pass
+        elif intent == "PRECAUTION":
+            pass
 
 
-    if intent == "HI":
-        print("""\tHi there! \n\tI'm dhanvant your medical Assistance..\n\tTry asking me\n\t1)I have headache\n\t2)Precautions of Malaria ...""")
-        pass
-    if intent == "THANKS":
-        print("\tAlways At your service Thank you")
-        break
+        if intent =="TREATMENT" and disease!="":
+            pass
+        elif intent =="TREATMENT":
+            pass
+
+
+        if intent == "HI":
+            response = """\tHi there! \n\tI'm dhanvant your medical Assistance..\n\tTry asking me\n\t1)I have headache\n\t2)Precautions of Malaria ..."""
+            pass
+        if intent == "THANKS":
+            response = "\tAlways At your service Thank you"
+            break
+
+app.run()
+
