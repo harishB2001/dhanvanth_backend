@@ -2,6 +2,8 @@ import similarity_finder
 import ner_operation
 import lookup_operations
 import intent_classifier
+import symptomAsking
+import precautionAsking
 
 def getExactSymptom(symptom):
     return similarity_finder.cosineSimilarities(symptom,'asset\\symptoms.csv')
@@ -17,3 +19,9 @@ def lookupOperations(symptom):
 
 def getIntent(sentence):
     return intent_classifier.getIntent(sentence)
+
+def getSymptoms(disease):
+    return symptomAsking.getSymptoms(disease)
+
+def precautionAsking(disease):
+    return precautionAsking.precautionAsking(disease)
