@@ -23,5 +23,5 @@ def getIntent(sentence):
 def getSymptoms(disease):
     return symptomAsking.getSymptoms(disease)
 
-def precautionAsking(disease):
-    return precautionAsking.precautionAsking(disease)
+def getPrecaution(disease):
+    return precautionAsking.getPrecaution(disease)

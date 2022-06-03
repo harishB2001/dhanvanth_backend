@@ -1,3 +1,4 @@
+Flask==2.1.2
 joblib==1.1.0
 mysql_connector_repackaged==0.3.1
 sentence_transformers==2.2.0

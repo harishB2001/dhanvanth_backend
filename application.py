@@ -38,13 +38,8 @@ def index():
     #Stat of positive response 
         if intent == "POSITIVE":
             # get the symptoms..
-            if symptom =="":
-                try:
-                    symptom = p.relatedSymptoms[0]
-                except:
-                    pass
-            else:
-                symptom = application_util.getExactSymptom(symptom)["exactWord"]
+            symptom = p.relatedSymptoms[0]
+            symptom = application_util.getExactSymptom(symptom)["exactWord"]
             p.allSymptoms = handler.acceptSymptoms(p.allSymptoms, symptom)
             relatedSymptomsTF = application_util.lookup_operations.getRelevantSymptoms(p.allSymptoms)
             p.possibleDiseases = relatedSymptomsTF["diseaseSet"]
@@ -114,35 +109,35 @@ def index():
         if intent == "SYMPTOM" and disease!="":
             disease = application_util.getExactDisease(disease)
             allSymp = application_util.getSymptoms(disease)
-            s = 'Few Symptoms of '+disease+" are:"
+            s = 'Few Symptoms of '+disease["exactWord"]+" are:"
             for i in allSymp:
-                s+="\n"+i
+                s+="\n"+i+","
             p.message = s
             return p.respons()
         elif intent == "SYMPTOM":
-            p.message = "Try Asking..'i have symptoms of malaria'"
+            p.message = "Try Asking..'what are the symptoms of malaria'"
             return p.respons()
             
 
 
         if intent == "PRECAUTION" and disease!="":
             disease = application_util.getExactDisease(disease)
-            rows = application_util.precautionAsking(disease)
-            pre = 'Few Symptoms of '+disease+" are:"
-            for i in pre:
-                pre+="\n"+i
-            p.message = pre
+            allPre = application_util.getPrecaution(disease)
+            s = 'Few precautions of '+disease["exactWord"]+" are:"
+            for i in allPre:
+                s+="\n"+i+","
+            p.message = s
             return p.respons()
         elif intent == "PRECAUTION":
             p.message = "Try Asking..'what are the Precaution of jaundice'"
             return p.respons()
 
         if intent == "HI":
-            response = """\tHi there! \n\tI'm dhanvant your medical Assistance..\n\tTry asking me\n\t1)I have headache\n\t2)Precautions of Malaria ..."""
-            pass
+            p.message = """\tHi there! \n\tI'm dhanvant your medical Assistance..\n\tTry asking me..\n\t1)I have headache,\n\t2)Precautions of Malaria ..."""
+            return p.respons()
         if intent == "THANKS":
-            response = "\tAlways At your service Thank you"
-            break
+            p.message = "\tAlways At your service.Thank you"
+            return p.respons()
 
 app.run()
 
