@@ -38,7 +38,10 @@ def index():
     #Stat of positive response 
         if intent == "POSITIVE":
             # get the symptoms..
-            symptom = p.relatedSymptoms[0]
+            try:
+                symptom = p.relatedSymptoms[0]
+            except:
+                pass
             symptom = application_util.getExactSymptom(symptom)["exactWord"]
             p.allSymptoms = handler.acceptSymptoms(p.allSymptoms, symptom)
             relatedSymptomsTF = application_util.lookup_operations.getRelevantSymptoms(p.allSymptoms)
@@ -55,7 +58,7 @@ def index():
             # ##
 
             if p.i>=3:
-                if (len(p.possibleDiseases) <=2  or len(p.relatedSymptoms) == 0):
+                if (len(p.possibleDiseases) <=3  or len(p.relatedSymptoms) == 0):
                     return p.createResponse()
             try:
                p.message = "Do you have any symptoms of "+p.relatedSymptoms[0] +" ?"
@@ -86,7 +89,7 @@ def index():
        
                     
             if p.i>=3:
-                if (len(p.possibleDiseases) <= 2 or len(p.relatedSymptoms) == 0):
+                if (len(p.possibleDiseases) <= 3 or len(p.relatedSymptoms) == 0):
                     return p.createResponse()
             try:
                 p.message = "Do you have any symptoms of "+p.relatedSymptoms[0] +" ?"
@@ -109,10 +112,8 @@ def index():
         if intent == "SYMPTOM" and disease!="":
             disease = application_util.getExactDisease(disease)
             allSymp = application_util.getSymptoms(disease)
-            s = 'Few Symptoms of '+disease["exactWord"]+" are:"
-            for i in allSymp:
-                s+="\n"+i+","
-            p.message = s
+            s = 'Few Symptoms of '+disease["exactWord"]+" are:\n"
+            p.message = s+",\n".join(allSymp)
             return p.respons()
         elif intent == "SYMPTOM":
             p.message = "Try Asking..'what are the symptoms of malaria'"
@@ -133,7 +134,7 @@ def index():
             return p.respons()
 
         if intent == "HI":
-            p.message = """\tHi there! \n\tI'm dhanvant your medical Assistance..\n\tTry asking me..\n\t1)I have headache,\n\t2)Precautions of Malaria ..."""
+            p.message = """\tHi there! \n\tI'm dhanvant. your medical Assistance..\n\tTry asking me..\n\t1)I have headache,\n\t2)Precautions of Malaria ..."""
             return p.respons()
         if intent == "THANKS":
             p.message = "\tAlways At your service.Thank you"

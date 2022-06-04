@@ -77,6 +77,11 @@ thanks =  [
       "thanks for your work",
       "much appreciated",
       "thanks for the treatment",
+      "ok",
+      "oh okk",
+      "bye",
+      "bye"
+
       ]
 
 
